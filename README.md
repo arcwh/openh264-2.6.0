@@ -1,197 +1,100 @@
-OpenH264
-========
-OpenH264 is a codec library which supports H.264 encoding and decoding. It is suitable for use in real time applications such as WebRTC. See http://www.openh264.org/ for more details.
+# OpenH264 Android
 
-Encoder Features
-----------------
-- Constrained Baseline Profile up to Level 5.2 (Max frame size is 36864 macro-blocks)
-- Arbitrary resolution, not constrained to multiples of 16x16
-- Rate control with adaptive quantization, or constant quantization
-- Slice options: 1 slice per frame, N slices per frame, N macroblocks per slice, or N bytes per slice
-- Multiple threads automatically used for multiple slices
-- Temporal scalability up to 4 layers in a dyadic hierarchy
-- Simulcast AVC up to 4 resolutions from a single input
-- Spatial simulcast up to 4 resolutions from a single input
-- Long Term Reference (LTR) frames
-- Memory Management Control Operation (MMCO)
-- Reference picture list modification
-- Single reference frame for inter prediction
-- Multiple reference frames when using LTR and/or 3-4 temporal layers
-- Periodic and on-demand Instantaneous Decoder Refresh (IDR) frame insertion
-- Dynamic changes to bit rate, frame rate, and resolution
-- Annex B byte stream output
-- YUV 4:2:0 planar input
+This project contains the OpenH264 2.6.0 source code and a build script for building OpenH264 as Android libraries.
 
-Decoder Features
-----------------
-- Constrained Baseline Profile up to Level 5.2 (Max frame size is 36864 macro-blocks)
-- Arbitrary resolution, not constrained to multiples of 16x16
-- Single thread for all slices
-- Long Term Reference (LTR) frames
-- Memory Management Control Operation (MMCO)
-- Reference picture list modification
-- Multiple reference frames when specified in Sequence Parameter Set (SPS)
-- Annex B byte stream input
-- YUV 4:2:0 planar output
+Upstream repository: https://github.com/cisco/openh264
 
-OS Support
-----------
-- Windows 64-bit and 32-bit
-- Mac OS X 64-bit and 32-bit
-- Mac OS X ARM64
-- Linux 64-bit and 32-bit
-- Android 64-bit and 32-bit
-- iOS 64-bit and 32-bit
-- Windows Phone 32-bit
+## Build Environment
 
-Architectures verified to be working
-----------
-- ppc64el
+Example build environment:
 
-Processor Support
------------------
-- Intel x86 optionally with MMX/SSE (no AVX yet, help is welcome)
-- ARMv7 optionally with NEON, AArch64 optionally with NEON
-- Any architecture using C/C++ fallback functions
+- macOS (the build script only supports macOS hosts)
+- Android NDK: r28c
+- OpenH264: 2.6.0
 
-Building the Library
---------------------
-NASM needed to be installed for assembly code: workable version 2.10.06 or above, NASM can be downloaded from http://www.nasm.us/.
-For Mac OSX 64-bit NASM needed to be below version 2.11.08 as NASM 2.11.08 will introduce error when using RIP-relative addresses in Mac OSX 64-bit
+You may replace the versions above according to your local environment.
 
-To build the arm assembly for Windows Phone, gas-preprocessor is required. It can be downloaded from git://git.libav.org/gas-preprocessor.git
+## Supported Architectures
 
-For Android Builds
-------------------
-To build for android platform, You need to install android sdk and ndk. You also need to export `**ANDROID_SDK**/tools` to PATH. On Linux, this can be done by
+- armeabi-v7a
+- arm64-v8a
 
-    export PATH=**ANDROID_SDK**/tools:$PATH
+## Build Instructions
 
-The codec and demo can be built by
+The whole build is done by `build_openh264_android.sh` in the project root. You only need to adjust a few settings in the script and run it.
 
-    make OS=android NDKROOT=**ANDROID_NDK** TARGET=**ANDROID_TARGET**
+### 1. Configure the Build Script
 
-Valid `**ANDROID_TARGET**` can be found in `**ANDROID_SDK**/platforms`, such as `android-12`.
-You can also set `ARCH`, `NDKLEVEL` according to your device and NDK version.
-`ARCH` specifies the architecture of android device. Currently `arm`, `arm64`, `x86` and `x86_64` are supported, the default is `arm`. (`mips` and `mips64` can also be used, but there's no specific optimization for those architectures.)
-`NDKLEVEL` specifies android api level, the default is 12. Available possibilities can be found in `**ANDROID_NDK**/platforms`, such as `android-21` (strip away the `android-` prefix).
+Open `build_openh264_android.sh` and update the following variables at the top of the file:
 
-By default these commands build for the `armeabi-v7a` ABI. To build for the other android
-ABIs, add `ARCH=arm64`, `ARCH=x86`, `ARCH=x86_64`, `ARCH=mips` or `ARCH=mips64`.
-To build for the older `armeabi` ABI (which has armv5te as baseline), add `APP_ABI=armeabi` (`ARCH=arm` is implicit).
-To build for 64-bit ABI, such as `arm64`, explicitly set `NDKLEVEL` to 21 or higher.
-
-For iOS Builds
---------------
-You can build the libraries and demo applications using xcode project files
-located in `codec/build/iOS/dec` and `codec/build/iOS/enc`.
-
-You can also build the libraries (but not the demo applications) using the
-make based build system from the command line. Build with
-
-    make OS=ios ARCH=**ARCH**
-
-Valid values for `**ARCH**` are the normal iOS architecture names such as
-`armv7`, `armv7s`, `arm64`, and `i386` and `x86_64` for the simulator.
-Another settable iOS specific parameter
-is `SDK_MIN`, specifying the minimum deployment target for the built library.
-For other details on building using make on the command line, see
-'For All Platforms' below.
-
-For Linux Builds
---------------
-
-You can build the libraries (but not the demo applications) using the
-make based build system from the command line. Build with
-
-    make OS=linux ARCH=**ARCH**
-
- You can set `ARCH` according to your linux device .
-`ARCH` specifies the architecture of the device. Currently `arm`, `arm64`, `x86` and `x86_64` are supported   
-
- NOTICE:
- 	If your computer is x86 architecture, for build the libnary which be used on arm/aarch64 machine, you may need to use cross-compiler, for example:
- 		make OS=linux CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ ARCH=arm64
-   		 or
-    	make OS=linux CC=arm-linux-gnueabi-gcc CXX=arm-linux-gnueabi-g++ ARCH=arm
-
-
-For Windows Builds
-------------------
-
-"make" must be installed. It is recommended to install the Cygwin and "make" must be selected to be included in the installation. After the installation, please add the Cygwin bin path to your PATH.
-
-openh264/build/AutoBuildForWindows.bat is provided to help compile the libraries on Windows platform.  
-Usage of the .bat script:  
-
-    `AutoBuildForWindows.bat Win32-Release-ASM` for x86 Release build  
-    `AutoBuildForWindows.bat Win64-Release-ASM` for x86_64 Release build  
-    `AutoBuildForWindows.bat ARM64-Release-ASM` for arm64 release build  
-for more usage, please refer to the .bat script help.  
-
-For All Platforms
--------------------
-
-Using make
-----------
-
-From the main project directory:
-- `make` for automatically detecting architecture and building accordingly
-- `make ARCH=i386` for x86 32-bit builds
-- `make ARCH=x86_64` for x86 64-bit builds
-- `make ARCH=arm64` for arm64 Mac 64-bit builds
-- `make V=No` for a silent build (not showing the actual compiler commands)
-- `make DEBUGSYMBOLS=True` for two libraries, one is normal libraries, another one is removed the debugging symbol table entries (those created by the -g option)
-
-The command line programs `h264enc` and `h264dec` will appear in the main project directory.
-
-A shell script to run the command-line apps is in `testbin/CmdLineExample.sh`
-
-Usage information can be found in `testbin/CmdLineReadMe`
-
-Using meson
------------
-
-Meson build definitions have been added, and are known to work on Linux
-and Windows, for x86 and x86 64-bit.
-
-See <http://mesonbuild.com/Installing.html> for instructions on how to
-install meson, then:
-
-``` shell
-meson setup builddir
-ninja -C builddir
+```bash
+NDK="/Users/anathan/Documents/android-ndk-r28c"   # Path to the Android NDK on your machine
+API=23                                            # Minimum Android API level (minSdk) of the libraries
 ```
 
-Run the tests with:
+- `NDK`: **Must** be changed to the Android NDK path on your machine, e.g. `/Users/yourname/Library/Android/sdk/ndk/28.2.xxxxxxx`.
+- `API`: The minimum Android API level of the generated libraries. It should not be higher than the `minSdk` of the app that uses them.
 
-``` shell
-meson test -C builddir -v
+The script also checks the following, and stops with an error if any check fails:
+
+- The NDK LLVM toolchain exists in `$NDK/toolchains/llvm/prebuilt/darwin-x86_64/bin`.
+- `/usr/bin/make` (the macOS system make) is available. Install the Xcode Command Line Tools with `xcode-select --install` if it is missing.
+
+### 2. Grant Execute Permission
+
+```bash
+chmod +x build_openh264_android.sh
 ```
 
-Install with:
+### 3. Build Libraries
 
-``` shell
-ninja -C builddir install
+```bash
+./build_openh264_android.sh
 ```
 
-Using the Source
-----------------
-- `codec` - encoder, decoder, console (test app), build (makefile, vcproj)
-- `build` - scripts for Makefile build system
-- `test` - GTest unittest files
-- `testbin` - autobuild scripts, test app config files
-- `res` - yuv and bitstream test files
+The script builds `armeabi-v7a` and `arm64-v8a` in sequence. To build only one ABI, edit the `ABIS` array near the end of the script.
 
-Known Issues
-------------
-See the issue tracker on https://github.com/cisco/openh264/issues
-- Encoder errors when resolution exceeds 3840x2160
-- Encoder errors when compressed frame size exceeds half uncompressed size
-- Decoder errors when compressed frame size exceeds 1MB
-- Encoder RC requires frame skipping to be enabled to hit the target bitrate,
-  if frame skipping is disabled the target bitrate may be exceeded
+## Build Output
 
-License
--------
-BSD, see `LICENSE` file for details.
+After a successful build, the output is located in the `android/` directory of the project root:
+
+```text
+android/
+├── armeabi-v7a/
+│   ├── include/
+│   │   └── wels/
+│   │       ├── codec_api.h
+│   │       ├── codec_app_def.h
+│   │       ├── codec_def.h
+│   │       └── codec_ver.h
+│   └── lib/
+│       ├── libopenh264.so
+│       ├── libopenh264.a
+│       └── pkgconfig/
+│           └── openh264.pc
+└── arm64-v8a/
+    └── (same layout as armeabi-v7a)
+```
+
+- `lib/libopenh264.so`: Shared library.
+- `lib/libopenh264.a`: Static library.
+- `include/wels/`: Public headers.
+- `lib/pkgconfig/openh264.pc`: pkg-config file, e.g. for linking OpenH264 when building FFmpeg.
+
+Use either the shared library or the static library depending on your integration.
+
+## Notes
+
+- Do **not** run `make OS=android clean` manually. OpenH264's Android `clean` target invokes `ndk-build` and Gradle, and may trigger the quarantined NDK bundled make on macOS. The script cleans the build artifacts by itself before building each ABI.
+- The `android/<ABI>/` output directory is deleted and regenerated on every build.
+- The `prefix` in `openh264.pc` is the absolute output path on the build machine. Update it if you move the output to another directory.
+
+## License
+
+OpenH264 is licensed under the BSD 2-Clause License. See the `LICENSE` file for details.
+
+OpenH264 copyright belongs to Cisco Systems.
+
+For more information about OpenH264:
+
+https://www.openh264.org/
